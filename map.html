@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+	<link rel="stylesheet" href="css/leaflet.css" /> <!-- This is for mapbox -->
+	<link rel="stylesheet" type="text/css" href="css/MarkerCluster.css" /> <!-- Use to group Marker -->
+	<link rel="stylesheet" type="text/css" href="css/MarkerCluster.Default.css" /><!-- Use to group Marker -->
+	
+	<script type='text/javascript' src="js/leaflet-src.js"></script><!-- This is for mapbox -->
+	<script type='text/javascript' src='js/leaflet.markercluster.js'></script><!-- Use to group Marker -->
+	<script src="js/leaflet.markercluster-src.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> 
+	
+	
+	
+<title>OpenStreetMap Example</title>
+
+</head>
+<body><br><br><center>
+	 <div id="mapid" style="width: 1400px; height: 650px;"></div></center>
+</body>
+<script>
+
+$(document).ready(function(){
+	//InitChart();
+	
+	  $.ajax
+	  ({
+		  url: "map_data.php",
+		  dataType: "json",
+		  success: function(result)
+		  {
+	         var latitude=[],longitude=[],provider=[];	    
+	           $.each(result.Data, function(index, object) {
+		          
+		           latitude[index]= object.gatewaymeta.latitude;
+		           longitude[index]=object.gatewaymeta.longitude;
+		           
+		           if(object.gatewaymeta.provider)
+				   {
+						provider[index]=object.gatewaymeta.provider;
+				   }
+				   else
+				   {
+						provider[index]="N/A";
+				   }
+		          // console.log("provider : "+object.gatewaymeta.provider);
+		           
+				});
+	           map_draw(latitude,longitude,provider);
+	    }});
+	
+	
+});
+
+function map_draw(latitude,longitude,provider)
+{
+	var mymap = L.map('mapid').setView([10.1, 20.2], 13);
+
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+	    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(mymap);
+
+	var myIcon = L.icon({
+		  iconUrl:'images/map-marker-pratik.png',
+		  iconRetinaUrl:'map-marker-pratik.png',
+		  iconSize: [25, 40]
+		});
+	
+	var marker_cluster = L.markerClusterGroup();
+	
+	for(var i = 0; i < latitude.length; i++){
+		//console.log("latitude = "+latitude[i]);
+	    //console.log("longitude ="+longitude[i]);
+	 var marker =  L.marker([latitude[i], longitude[i]],{icon: myIcon});
+	 marker.bindPopup("Latitude = "+latitude[i]+"<br>"+"Longitude = "+longitude[i]+"<br>"+"Provider = "+provider[i]);
+	 marker_cluster.addLayer( marker );
+	}
+
+	mymap.addLayer( marker_cluster );
+	mymap.fitBounds(marker_cluster.getBounds())
+}
+</script>
+</html>
